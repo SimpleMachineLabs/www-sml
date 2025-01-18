@@ -1,0 +1,156 @@
+# Test Generation
+
+## Overview
+
+SML2's test generation system analyzes real user interactions to automatically create maintainable end-to-end tests. It uses the Page Object pattern for better test organization and maintenance.
+
+## Components
+
+### TestFlowGenerator
+
+Analyzes user flows from ClickHouse data and generates test cases.
+
+```javascript
+const generator = new TestFlowGenerator({
+  siteId: "your-site-id", // Required: Site identifier
+  minEvents: 10, // Minimum events per flow
+  confidence: 0.8, // Confidence threshold (0-1)
+  patternThreshold: 0.3, // Pattern detection threshold
+  outputDir: "./generated-tests", // Output directory for tests
+});
+```
+
+### PageObjectGenerator
+
+Generates Page Object classes based on analyzed interactions.
+
+```javascript
+const generator = new PageObjectGenerator({
+  outputDir: "./page-objects", // Output directory for page objects
+  selectorPrefix: "", // Prefix for selectors
+  methodStyle: "fluent", // Method style: "fluent" or "standard"
+});
+```
+
+## Usage
+
+### CLI Interface
+
+Generate tests for a site:
+
+```bash
+npm run generate-tests your-site-id
+```
+
+Environment variables:
+
+- `MIN_EVENTS`: Minimum events per flow (default: 10)
+- `CONFIDENCE`: Confidence threshold (default: 0.8)
+- `PATTERN_THRESHOLD`: Pattern detection threshold (default: 0.3)
+- `DEBUG`: Enable debug logging
+
+### Generated Files
+
+#### Test Files
+
+- Located in `generated-tests/*.test.js`
+- Use Jest/Selenium test format
+- Include user flow frequency data
+- Automatically manage WebDriver lifecycle
+
+Example:
+
+```javascript
+const { Builder } = require("selenium-webdriver");
+const HomePage = require("./page-objects/home-page");
+const ProductPage = require("./page-objects/product-page");
+
+describe("Automated User Flow Test", () => {
+  let driver;
+  let homePage;
+  let productPage;
+
+  beforeAll(async () => {
+    driver = await new Builder().forBrowser("chrome").build();
+    homePage = new HomePage(driver);
+    productPage = new ProductPage(driver);
+  });
+
+  afterAll(async () => {
+    await driver.quit();
+  });
+
+  test("User flow test", async () => {
+    await homePage.searchProduct("headphones");
+    await productPage.addToCart();
+  });
+});
+```
+
+#### Page Objects
+
+- Located in `generated-tests/page-objects/*.js`
+- Follow Page Object pattern
+- Include selectors and interaction methods
+- Support fluent interface
+
+Example:
+
+```javascript
+const { By } = require("selenium-webdriver");
+
+class ProductPage {
+  constructor(driver) {
+    this.driver = driver;
+    this.addToCartButtonSelector = "#add-to-cart";
+  }
+
+  async addToCart() {
+    const button = await this.driver.findElement(
+      By.css(this.addToCartButtonSelector)
+    );
+    await button.click();
+    return this;
+  }
+}
+```
+
+## Supported Interactions
+
+- `click`: Click on elements
+- `form_submit`: Submit forms with data
+- `input`: Enter text into fields
+- `pageview`: Navigate to URLs
+
+## Page Types
+
+The system automatically identifies page types based on URLs and elements:
+
+- `LoginPage`: Login-related pages
+- `SignupPage`: Registration pages
+- `ProfilePage`: User profile pages
+- `CartPage`: Shopping cart
+- `CheckoutPage`: Checkout process
+- `SearchPage`: Search functionality
+- `ProductPage`: Product details
+- `SettingsPage`: Account settings
+- `HomePage`: Default landing pages
+
+## Best Practices
+
+1. **Configuration**
+
+   - Set appropriate confidence thresholds
+   - Use descriptive site IDs
+   - Maintain consistent output directories
+
+2. **Test Organization**
+
+   - Group related flows
+   - Use meaningful test names
+   - Keep page objects focused
+
+3. **Maintenance**
+   - Regularly update generated tests
+   - Monitor test success rates
+   - Adjust thresholds as needed

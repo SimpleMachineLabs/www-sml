@@ -1,0 +1,230 @@
+# Installation Guide
+
+## Prerequisites
+
+Before installing SML2, ensure you have the following prerequisites:
+
+- Node.js >= 14.x
+- Redis >= 6.0
+- ClickHouse >= 21.8
+- npm or yarn
+- Git (optional)
+
+## Quick Installation
+
+### 1. Using Installation Script
+
+```bash
+curl -s https://cdn.your-domain.com/sml2/install.sh | bash
+```
+
+### 2. Manual Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/your-repo/sml2.git
+
+# Install dependencies
+cd sml2
+npm install
+
+# Build the project
+npm run build
+```
+
+## Detailed Setup
+
+### Server Setup
+
+1. **Configure Environment**
+
+   ```bash
+   cp .env.example .env
+   # Edit .env with your settings
+   ```
+
+2. **Database Setup**
+
+   ```bash
+   # Start ClickHouse
+   sudo service clickhouse-server start
+
+   # Create database and tables
+   npm run db:setup
+   ```
+
+3. **Redis Setup**
+
+   ```bash
+   # Start Redis
+   sudo service redis-server start
+   ```
+
+4. **Start Server**
+
+   ```bash
+   # Development mode
+   npm run dev
+
+   # Production mode
+   npm run start
+   ```
+
+### Client Integration
+
+1. **Add Script Tag**
+
+   ```html
+   <script
+     id="sml2-tracker"
+     src="https://cdn.your-domain.com/sml2/browser-tracker.min.js"
+     data-site-id="your-site-id"
+     data-auto-init
+   ></script>
+   ```
+
+2. **Configure Tracker**
+   ```javascript
+   window.SML2.init({
+     siteId: "your-site-id",
+     endpoint: "https://api.your-domain.com/collect",
+   });
+   ```
+
+## Docker Installation
+
+### Using Docker Compose
+
+1. **Create docker-compose.yml**
+
+   ```yaml
+   version: "3.8"
+   services:
+     app:
+       build: .
+       ports:
+         - "3000:3000"
+       environment:
+         - NODE_ENV=production
+       depends_on:
+         - redis
+         - clickhouse
+
+     redis:
+       image: redis:6
+       ports:
+         - "6379:6379"
+
+     clickhouse:
+       image: clickhouse/clickhouse-server:21.8
+       ports:
+         - "8123:8123"
+   ```
+
+2. **Start Services**
+   ```bash
+   docker-compose up -d
+   ```
+
+## Production Deployment
+
+### 1. System Requirements
+
+- 2+ CPU cores
+- 4GB+ RAM
+- 20GB+ storage
+- Linux-based OS recommended
+
+### 2. Security Setup
+
+1. **SSL Configuration**
+
+   ```bash
+   # Generate SSL certificate
+   certbot certonly --nginx -d your-domain.com
+   ```
+
+2. **Firewall Rules**
+   ```bash
+   # Allow necessary ports
+   sudo ufw allow 80,443,3000/tcp
+   ```
+
+### 3. Process Management
+
+Using PM2:
+
+```bash
+# Install PM2
+npm install -g pm2
+
+# Start application
+pm2 start ecosystem.config.js
+
+# Enable startup script
+pm2 startup
+```
+
+## Verification
+
+1. **Check Server Status**
+
+   ```bash
+   curl http://localhost:3000/health
+   ```
+
+2. **Test Tracking**
+
+   ```javascript
+   // In browser console
+   SML2.track("test_event", { value: "test" });
+   ```
+
+3. **Verify Data Storage**
+   ```sql
+   -- In ClickHouse
+   SELECT * FROM sml2.events LIMIT 1;
+   ```
+
+## Common Issues
+
+### Installation Fails
+
+1. Check Node.js version:
+
+   ```bash
+   node --version
+   ```
+
+2. Clear npm cache:
+   ```bash
+   npm cache clean --force
+   ```
+
+### Connection Issues
+
+1. Verify Redis connection:
+
+   ```bash
+   redis-cli ping
+   ```
+
+2. Check ClickHouse:
+   ```bash
+   curl http://localhost:8123/ping
+   ```
+
+## Next Steps
+
+1. Review the [Configuration Guide](./configuration.md)
+2. Set up monitoring and alerts
+3. Configure backup strategy
+4. Review security settings
+
+## Support
+
+For additional help:
+
+- Check [Troubleshooting Guide](./troubleshooting.md)
+- Join our [Discord Community](https://discord.gg/your-server)
+- Open an [Issue](https://github.com/your-repo/sml2/issues)

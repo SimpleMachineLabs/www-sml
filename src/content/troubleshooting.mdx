@@ -1,0 +1,346 @@
+# Troubleshooting Guide
+
+## Common Issues
+
+### Installation Problems
+
+#### Node.js Version Mismatch
+
+```bash
+Error: The engine "node" is incompatible with this module
+```
+
+**Solution:**
+
+1. Check your Node.js version:
+   ```bash
+   node --version
+   ```
+2. Install the correct version (>= 14.x):
+   ```bash
+   nvm install 14
+   nvm use 14
+   ```
+
+#### Dependencies Installation Failed
+
+```bash
+npm ERR! code ELIFECYCLE
+```
+
+**Solution:**
+
+1. Clear npm cache:
+   ```bash
+   npm cache clean --force
+   ```
+2. Delete node_modules:
+   ```bash
+   rm -rf node_modules
+   ```
+3. Reinstall:
+   ```bash
+   npm install
+   ```
+
+### Database Connection Issues
+
+#### ClickHouse Connection Failed
+
+```bash
+Error: Connection refused (tcp://localhost:8123)
+```
+
+**Solution:**
+
+1. Check ClickHouse status:
+   ```bash
+   sudo systemctl status clickhouse-server
+   ```
+2. Verify connection:
+   ```bash
+   curl http://localhost:8123/ping
+   ```
+3. Check logs:
+   ```bash
+   sudo tail -f /var/log/clickhouse-server/clickhouse-server.log
+   ```
+
+#### Redis Connection Error
+
+```bash
+Error: Redis connection to localhost:6379 failed
+```
+
+**Solution:**
+
+1. Check Redis status:
+   ```bash
+   redis-cli ping
+   ```
+2. Verify configuration:
+   ```bash
+   redis-cli CONFIG GET *
+   ```
+3. Check authentication:
+   ```bash
+   redis-cli AUTH your_password
+   ```
+
+### Tracking Issues
+
+#### Events Not Being Recorded
+
+**Symptoms:**
+
+- No events appearing in dashboard
+- Console errors in browser
+- Server not receiving data
+
+**Solutions:**
+
+1. Check Script Installation:
+
+   ```html
+   <!-- Verify script tag -->
+   <script
+     id="sml2-tracker"
+     src="https://cdn.your-domain.com/sml2/tracker.min.js"
+     data-site-id="your-site-id"
+     data-auto-init
+   ></script>
+   ```
+
+2. Verify Initialization:
+
+   ```javascript
+   // Check if SML2 is loaded
+   console.log(window.SML2);
+
+   // Verify initialization
+   window.SML2.init({
+     siteId: "your-site-id",
+     endpoint: "https://api.your-domain.com/collect",
+   });
+   ```
+
+3. Check Network Requests:
+   - Open browser DevTools
+   - Look for failed requests
+   - Check CORS headers
+
+#### Consent Issues
+
+**Symptoms:**
+
+- Events blocked due to missing consent
+- Consent popup not showing
+- Consent status not persisting
+
+**Solutions:**
+
+1. Check Consent Status:
+
+   ```javascript
+   // Verify consent
+   console.log(SML2.hasConsent());
+
+   // Force consent prompt
+   SML2.requestConsent();
+   ```
+
+2. Clear Consent Data:
+   ```javascript
+   // Reset consent
+   SML2.clearConsent();
+   ```
+
+### Test Generation Problems
+
+#### No Tests Generated
+
+**Symptoms:**
+
+- Empty test results
+- Low confidence scores
+- Missing user paths
+
+**Solutions:**
+
+1. Check Event Count:
+
+   ```sql
+   SELECT COUNT(*) FROM sml2.events
+   WHERE site_id = 'your-site-id'
+   AND timestamp >= NOW() - INTERVAL 1 DAY;
+   ```
+
+2. Verify Path Coverage:
+
+   ```http
+   GET /api/v1/analytics/coverage?siteId=your-site-id
+   ```
+
+3. Adjust Generation Parameters:
+   ```javascript
+   {
+       "minEvents": 5,        // Lower threshold
+       "confidence": 0.6,     // Reduce confidence requirement
+       "maxTests": 200        // Increase test limit
+   }
+   ```
+
+### Performance Issues
+
+#### High Latency
+
+**Symptoms:**
+
+- Slow event processing
+- Delayed test generation
+- API timeout errors
+
+**Solutions:**
+
+1. Check Server Load:
+
+   ```bash
+   top
+   htop
+   ```
+
+2. Monitor Database Performance:
+
+   ```sql
+   -- ClickHouse query times
+   SELECT event_date, count(),
+          avg(query_duration_ms) as avg_duration
+   FROM system.query_log
+   GROUP BY event_date
+   ORDER BY event_date DESC;
+   ```
+
+3. Optimize Configuration:
+   ```javascript
+   {
+       "batchSize": 50,          // Increase batch size
+       "compressionLevel": 6,    // Adjust compression
+       "maxParallelQueries": 5   // Limit concurrent queries
+   }
+   ```
+
+### Security Issues
+
+#### API Authentication Failures
+
+**Symptoms:**
+
+- 401 Unauthorized errors
+- Invalid token messages
+- Authentication timeouts
+
+**Solutions:**
+
+1. Check Token Format:
+
+   ```bash
+   # Verify JWT token
+   jwt decode your-token
+   ```
+
+2. Verify API Key:
+
+   ```bash
+   curl -H "Authorization: Bearer your-token" \
+        https://api.your-domain.com/health
+   ```
+
+3. Update Credentials:
+   ```bash
+   # Regenerate API key
+   npm run generate-api-key
+   ```
+
+## Debugging Tools
+
+### Log Analysis
+
+1. Server Logs:
+
+   ```bash
+   # Tail application logs
+   tail -f logs/app.log
+
+   # Search for errors
+   grep -i error logs/app.log
+   ```
+
+2. Browser Console:
+   ```javascript
+   // Enable debug mode
+   SML2.init({
+     debug: true,
+     debugLevel: "verbose",
+   });
+   ```
+
+### Network Monitoring
+
+1. Check Endpoints:
+
+   ```bash
+   # Test API availability
+   curl -v https://api.your-domain.com/health
+
+   # Monitor latency
+   ping api.your-domain.com
+   ```
+
+2. WebSocket Debug:
+   ```javascript
+   // Monitor WebSocket
+   SML2.debug.enableWebSocketLogs();
+   ```
+
+## Maintenance
+
+### Regular Checks
+
+1. Database Maintenance:
+
+   ```sql
+   -- Optimize tables
+   OPTIMIZE TABLE sml2.events FINAL;
+
+   -- Check table sizes
+   SELECT table, formatReadableSize(size)
+   FROM system.tables
+   WHERE database = 'sml2';
+   ```
+
+2. Cache Management:
+
+   ```bash
+   # Clear Redis cache
+   redis-cli FLUSHDB
+
+   # Monitor memory
+   redis-cli INFO memory
+   ```
+
+## Support Resources
+
+- Documentation: docs.your-domain.com
+- Community Forum: forum.your-domain.com
+- Email Support: support@your-domain.com
+- Status Page: status.your-domain.com
+
+## Common Error Codes
+
+| Code | Description                | Solution                                    |
+| ---- | -------------------------- | ------------------------------------------- |
+| E001 | Database Connection Failed | Check database credentials and connectivity |
+| E002 | Invalid API Key            | Verify or regenerate API key                |
+| E003 | Rate Limit Exceeded        | Implement backoff strategy                  |
+| E004 | Invalid Event Format       | Validate event data structure               |
+| E005 | Missing Consent            | Check consent management setup              |

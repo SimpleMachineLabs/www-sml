@@ -1,0 +1,298 @@
+# API Reference
+
+## Overview
+
+SML2 provides both a client-side JavaScript API for tracking user interactions and a CLI interface for test generation.
+
+## Client API
+
+### Initialization
+
+```javascript
+SML2.init({
+    siteId: string,           // Required: Your site identifier
+    endpoint: string,         // Required: Collection endpoint URL
+    options?: {              // Optional configuration
+        debug: boolean,      // Enable debug logging
+        anonymize: boolean,  // Enable data anonymization
+        consent: boolean     // Require consent
+    }
+});
+```
+
+### Event Tracking
+
+```javascript
+// Track a simple event
+SML2.track(eventName: string);
+
+// Track with custom properties
+SML2.track(eventName: string, properties: object);
+
+// Track with timing
+SML2.track(eventName: string, properties: object, timing: number);
+```
+
+### Consent Management
+
+```javascript
+// Check consent status
+const hasConsent = SML2.hasConsent();
+
+// Request consent
+SML2.requestConsent();
+
+// Set consent status
+SML2.setConsent(granted: boolean);
+
+// Clear consent
+SML2.clearConsent();
+```
+
+### Session Management
+
+```javascript
+// Get current session ID
+const sessionId = SML2.getSessionId();
+
+// Start new session
+SML2.startSession();
+
+// End current session
+SML2.endSession();
+```
+
+### User Identification
+
+```javascript
+// Set user ID
+SML2.setUserId(userId: string);
+
+// Clear user ID
+SML2.clearUserId();
+
+// Get anonymous ID
+const anonId = SML2.getAnonymousId();
+```
+
+## CLI Interface
+
+### Test Generation
+
+Generate end-to-end tests based on user interactions:
+
+```bash
+# Basic usage
+npm run generate-tests your-site-id
+
+# With environment variables
+MIN_EVENTS=20 CONFIDENCE=0.9 PATTERN_THRESHOLD=0.4 npm run generate-tests your-site-id
+```
+
+Configuration options:
+
+- `your-site-id`: Required. The site identifier to generate tests for
+- `MIN_EVENTS`: Optional. Minimum events per flow (default: 10)
+- `CONFIDENCE`: Optional. Confidence threshold 0-1 (default: 0.8)
+- `PATTERN_THRESHOLD`: Optional. Pattern detection threshold (default: 0.3)
+- `DEBUG`: Optional. Enable debug logging
+
+### Generated Files Structure
+
+```
+generated-tests/
+├── page-objects/
+│   ├── home-page.js
+│   ├── product-page.js
+│   ├── cart-page.js
+│   └── checkout-page.js
+├── userflow_1.test.js
+├── userflow_2.test.js
+└── userflow_3.test.js
+```
+
+## REST API
+
+### Authentication
+
+All API requests require authentication using a JWT token in the Authorization header:
+
+```bash
+Authorization: Bearer your-jwt-token
+```
+
+### Endpoints
+
+#### Event Collection
+
+```http
+POST /api/v1/collect
+Content-Type: application/json
+
+{
+    "siteId": "your-site-id",
+    "events": [{
+        "name": "string",
+        "properties": object,
+        "timestamp": number,
+        "sessionId": "string",
+        "userId": "string"
+    }]
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "count": 1,
+  "errors": []
+}
+```
+
+#### Site Management
+
+```http
+# Create site
+POST /api/v1/sites
+{
+    "name": "string",
+    "domain": "string",
+    "options": object
+}
+
+# Get site details
+GET /api/v1/sites/{siteId}
+
+# Update site
+PUT /api/v1/sites/{siteId}
+{
+    "name": "string",
+    "domain": "string",
+    "options": object
+}
+
+# Delete site
+DELETE /api/v1/sites/{siteId}
+```
+
+#### Analytics
+
+```http
+# Get event counts
+GET /api/v1/analytics/events
+?siteId=string
+&start=timestamp
+&end=timestamp
+
+# Get user paths
+GET /api/v1/analytics/paths
+?siteId=string
+&limit=number
+
+# Get test coverage
+GET /api/v1/analytics/coverage
+?siteId=string
+```
+
+### Error Handling
+
+All API endpoints return standard HTTP status codes:
+
+- 200: Success
+- 400: Bad Request
+- 401: Unauthorized
+- 403: Forbidden
+- 404: Not Found
+- 429: Too Many Requests
+- 500: Server Error
+
+Error Response Format:
+
+```json
+{
+    "error": {
+        "code": "string",
+        "message": "string",
+        "details": object
+    }
+}
+```
+
+### Rate Limiting
+
+API requests are rate limited based on:
+
+- IP address
+- API key
+- Endpoint
+
+Rate limit headers:
+
+```http
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 99
+X-RateLimit-Reset: 1623456789
+```
+
+## WebSocket API
+
+### Real-time Events
+
+```javascript
+// Connect to WebSocket
+const ws = new WebSocket("wss://api.your-domain.com/ws");
+
+// Subscribe to events
+ws.send(
+  JSON.stringify({
+    type: "subscribe",
+    siteId: "your-site-id",
+    events: ["*"],
+  })
+);
+
+// Handle incoming events
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log(data);
+};
+```
+
+## Node.js API
+
+### Test Generation
+
+The test generation system can also be used programmatically:
+
+```javascript
+const { TestFlowGenerator } = require("sml2/src/tests/test-flow-generator");
+const {
+  PageObjectGenerator,
+} = require("sml2/src/tests/page-objects/page-object-generator");
+
+// Initialize test generator
+const generator = new TestFlowGenerator({
+  siteId: "your-site-id", // Required: Site identifier
+  minEvents: 10, // Minimum events per flow
+  confidence: 0.8, // Confidence threshold (0-1)
+  patternThreshold: 0.3, // Pattern detection threshold
+  outputDir: "./generated-tests", // Output directory for tests
+});
+
+// Generate tests
+const tests = await generator.generateTests();
+
+// Access the page object generator
+const pageObjectGenerator = generator.pageObjectGenerator;
+
+// Configure page object generation
+pageObjectGenerator.config = {
+  outputDir: "./page-objects",
+  selectorPrefix: "",
+  methodStyle: "fluent",
+};
+```
+
+For more details on test generation, see [Test Generation Documentation](./test-generation.md).

@@ -1,0 +1,193 @@
+# Configuration Guide
+
+## Overview
+
+This guide covers all configuration options for SML2, including client-side tracking, server settings, and test generation parameters.
+
+## Client Configuration
+
+### Basic Setup
+
+```javascript
+{
+    "siteId": "your-site-id",          // Required: Your unique site identifier
+    "endpoint": "https://api.your-domain.com/collect", // Required: Data collection endpoint
+    "version": "1.0.0",                // Current version of configuration
+    "debug": false                     // Enable debug logging
+}
+```
+
+### Privacy Settings
+
+```javascript
+{
+    "anonymize": true,                 // Anonymize user data
+    "consentRequired": true,           // Require user consent
+    "allowedDomains": [               // Domains allowed to use the tracker
+        "your-domain.com",
+        "sub.your-domain.com"
+    ],
+    "cookiePrefix": "sml2_",          // Prefix for all cookies
+    "cookieExpiry": 365,              // Cookie expiry in days
+    "privacyPolicy": "https://your-domain.com/privacy" // Link to privacy policy
+}
+```
+
+### Data Collection
+
+```javascript
+{
+    "sampleRate": 100,                // Percentage of data to collect (1-100)
+    "heartbeatInterval": 30000,       // Heartbeat interval in milliseconds
+    "batchSize": 10,                  // Number of events to batch before sending
+    "maxQueueSize": 100,              // Maximum events to queue
+    "compression": true,              // Enable data compression
+    "retryAttempts": 3               // Number of retry attempts for failed sends
+}
+```
+
+### Rate Limiting
+
+```javascript
+{
+    "rateLimits": {
+        "maxRequests": 100,           // Maximum requests per window
+        "timeWindow": 60000,          // Time window in milliseconds
+        "blockDuration": 3600000      // Block duration after violations
+    }
+}
+```
+
+## Server Configuration
+
+### Environment Variables
+
+Create a `.env` file with the following settings:
+
+```env
+# Server
+PORT=3000
+NODE_ENV=production
+HOST=0.0.0.0
+
+# Redis
+REDIS_URL=redis://localhost:6379
+REDIS_PASSWORD=your_redis_password
+
+# ClickHouse
+CLICKHOUSE_HOST=http://localhost:8123
+CLICKHOUSE_USER=default
+CLICKHOUSE_PASSWORD=your_clickhouse_password
+CLICKHOUSE_DATABASE=sml2
+
+# Security
+JWT_SECRET=your_jwt_secret
+CORS_ORIGIN=https://your-domain.com
+RATE_LIMIT_MAX=100
+RATE_LIMIT_WINDOW=60000
+```
+
+### Server Settings
+
+```javascript
+{
+    "server": {
+        "trustProxy": true,           // Trust proxy headers
+        "compression": true,          // Enable response compression
+        "timeout": 30000,            // Request timeout in milliseconds
+        "bodyLimit": "1mb"           // Request body size limit
+    }
+}
+```
+
+### Database Settings
+
+```javascript
+{
+    "clickhouse": {
+        "maxRetries": 3,             // Maximum connection retries
+        "timeout": 30000,            // Query timeout
+        "compression": true,         // Enable compression
+        "maxParallelQueries": 10     // Maximum parallel queries
+    }
+}
+```
+
+## Test Generation Configuration
+
+```javascript
+{
+    "testGen": {
+        "minEvents": 10,             // Minimum events for flow analysis
+        "confidence": 0.8,           // Minimum confidence score (0-1)
+        "maxTests": 100,             // Maximum tests to generate
+        "browser": "chrome",         // Default browser for tests
+        "parallel": 4,              // Number of parallel test runs
+        "screenshotOnFailure": true  // Take screenshots on test failure
+    }
+}
+```
+
+## Advanced Features
+
+### Custom Event Tracking
+
+```javascript
+{
+    "customEvents": {
+        "enabled": true,
+        "allowList": ["click", "submit", "view"],
+        "maxCustomProps": 10,
+        "validation": {
+            "enabled": true,
+            "schema": "path/to/schema.json"
+        }
+    }
+}
+```
+
+### Performance Monitoring
+
+```javascript
+{
+    "performance": {
+        "enabled": true,
+        "metrics": ["FCP", "LCP", "CLS", "FID"],
+        "sampleRate": 10,
+        "reportingEndpoint": "/perf"
+    }
+}
+```
+
+## Best Practices
+
+1. **Security**
+
+   - Always use HTTPS endpoints
+   - Set strict CORS policies
+   - Rotate JWT secrets regularly
+   - Use strong passwords
+
+2. **Performance**
+
+   - Adjust batch size based on traffic
+   - Configure appropriate sampling rates
+   - Monitor rate limit settings
+   - Optimize database queries
+
+3. **Privacy**
+
+   - Enable anonymization
+   - Implement consent management
+   - Follow data retention policies
+   - Document data usage
+
+4. **Monitoring**
+   - Set up error tracking
+   - Monitor rate limit violations
+   - Track system performance
+   - Set up alerts
+
+## Troubleshooting
+
+See [Troubleshooting Guide](./troubleshooting.md) for common configuration issues and solutions.
