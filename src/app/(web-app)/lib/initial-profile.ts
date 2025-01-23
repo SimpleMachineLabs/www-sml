@@ -1,9 +1,6 @@
 import { currentUser, auth } from "@clerk/nextjs/server";
 import { db } from "./db";
 
-// This is an example of using clerk to create a profile record
-// in the database
-
 export const initialProfile = async () => {
   const user = await currentUser();
   const { redirectToSignIn } = await auth();

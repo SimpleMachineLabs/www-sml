@@ -1,7 +1,7 @@
 import { docsConfig } from "@/app/(www)/lib/docsHelper";
-import { DocsSideNav } from "@/app/(www)/components/DocsSideNav";
+import { DocsSideNav } from "@/app/components/DocsSideNav";
 import "@/app/(www)/styles/mdx.css";
-import Header from "@/app/(www)/components/header";
+import Header from "@/app/components/header";
 
 interface DocsLayoutProps {
   children: React.ReactNode;

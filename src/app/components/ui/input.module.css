@@ -1,0 +1,40 @@
+.base {
+  background-color: transparent;
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) - 2px);
+  color: hsl(var(--foreground));
+  display: flex;
+
+  font-size: 0.875rem;
+  height: 2.5rem;
+  max-width: 20rem;
+  outline-offset: 2px;
+  padding-inline: 0.5rem;
+  padding-block: 0.75rem;
+
+  width: 100%;
+}
+
+.base[type="file"] {
+  height: auto;
+}
+
+.base::file-selector-button {
+  background-color: transparent;
+  border: none;
+  color: hsl(var(--foreground));
+  padding: 0;
+}
+
+.base::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.base:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.base:focus-visible {
+  outline-color: hsl(var(--secondary));
+}

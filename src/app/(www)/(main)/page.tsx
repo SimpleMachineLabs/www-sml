@@ -1,5 +1,5 @@
-import Header from "@/app/(www)/components/header";
-import HeroSection from "@/app/(www)/components/hero";
+import Header from "@/app/components/header";
+import HeroSection from "@/app/components/hero";
 
 export default function Home() {
   return (

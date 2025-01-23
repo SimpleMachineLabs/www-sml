@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import { Mdx } from "@/app/(www)/components/MDXComponents";
+import { Mdx } from "@/app/components/MDXComponents";
 
 const docsDirectory = path.join(process.cwd(), "src/content");
 

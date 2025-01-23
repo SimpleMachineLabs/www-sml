@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { Button } from "./ui/Button";
 
 const Header = () => {
   const pathname = usePathname();
@@ -43,12 +42,12 @@ const Header = () => {
             `}>
             Docs
           </Link>
-          <SignedOut>
+          {/* <SignedOut>
             <SignInButton />
           </SignedOut>
           <SignedIn>
             <UserButton />
-          </SignedIn>
+          </SignedIn> */}
         </nav>
       </div>
     </header>

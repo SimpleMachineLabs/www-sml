@@ -3,8 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 
-import { CodeBlockWrapper } from "@/app/(www)/components/CodeBlockWrapper";
-import Pre from "@/app/(www)/components/PreWithCopy";
+import { CodeBlockWrapper } from "@/app/components/CodeBlockWrapper";
+import Pre from "@/app/components/PreWithCopy";
 
 const components = {
   h1: ({ ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (

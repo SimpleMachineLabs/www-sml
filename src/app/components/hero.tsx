@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "./ui/Button";
+import WaitListModal from "./WaitListModal";
 
 const HeroSection = ({
   title,
@@ -16,11 +17,7 @@ const HeroSection = ({
       <h2 className='max-w-[750px] text-center text-lg text-muted-foreground sm:text-xl mb-4'>
         {subtitle}
       </h2>
-      <Button>
-        <a href='/docs/installation' target='_blank' rel='noopener noreferer'>
-          Get Started
-        </a>
-      </Button>
+      <WaitListModal />
     </section>
   );
 };
