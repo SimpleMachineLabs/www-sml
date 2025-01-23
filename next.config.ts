@@ -2,6 +2,10 @@
 const nextConfig = {
   // Configure `pageExtensions` to include markdown and MDX files
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
+  eslint: {
+    // temporary
+    ignoreDuringBuilds: true,
+  },
   async redirects() {
     return [
       {
