@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { Button } from "./ui/Button";
 
 const Header = () => {
   const pathname = usePathname();
@@ -41,6 +43,12 @@ const Header = () => {
             `}>
             Docs
           </Link>
+          <SignedOut>
+            <SignInButton />
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
         </nav>
       </div>
     </header>

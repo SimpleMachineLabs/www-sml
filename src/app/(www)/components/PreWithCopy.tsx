@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { CopyButton } from "@/app/components/CopyButton";
+import { CopyButton } from "@/app/(www)/components/CopyButton";
 
 interface PreProps extends React.HTMLAttributes<HTMLDivElement> {}
 

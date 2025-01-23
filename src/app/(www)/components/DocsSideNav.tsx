@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SidebarNavItem } from "@/app/lib/types/navigator";
+import { SidebarNavItem } from "@/app/(www)/lib/types/navigator";
 
 export interface DocsSidebarNavProps {
   items: SidebarNavItem[];
