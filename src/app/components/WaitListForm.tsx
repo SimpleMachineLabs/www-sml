@@ -25,6 +25,8 @@ const FormSchema = z.object({
 
 export default function WaitListForm() {
   const [showThanks, setShowThanks] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -36,21 +38,35 @@ export default function WaitListForm() {
   });
 
   async function onSubmit(values: z.infer<typeof FormSchema>) {
-    fetch("/api/join-waitlist", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    })
-      .then((result) => {
-        setShowThanks(true);
-      })
-      .catch((error) => {
-        console.error("Error submitting form:", error);
+    try {
+      const response = await fetch("/api/join-waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
       });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 409) {
+          throw new Error(errorData.error);
+        } else {
+          throw new Error(errorData.error || "An unknown error occured");
+        }
+      }
+      setShowThanks(true);
+    } catch (error: any) {
+      setShowError(true);
+      setErrorMessage(`Sorry: ${error.message}`);
+      
+    }
   }
 
   if (showThanks) {
     return <p>Thank you for signing up!</p>;
+  }
+
+  if (showError) {
+    return <p>{errorMessage}</p>;
   }
 
   return (

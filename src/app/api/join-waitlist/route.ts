@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json(); // Parse the request body
+    const body = await req.json();
     const { firstName, lastName, emailAddress } = body;
 
     const record = await db.emailList.findFirst({
@@ -13,7 +13,10 @@ export async function POST(req: Request) {
     });
 
     if (record) {
-      throw new Error("Already joined waitlist!");
+      return NextResponse.json(
+        { error: "Already joined waitlist!" },
+        { status: 409 } // Conflict response
+      );
     }
 
     // Create a record in the database
